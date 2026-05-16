@@ -1,6 +1,6 @@
 # Agent Guidance for this Repository
 
-Purpose: give AI coding agents the minimal, actionable information needed to be productive in this monorepo.
+Purpose: give AI coding agents and contributors clear, minimal, actionable instructions for working in this monorepo.
 
 Quickstart
 - **Prereqs:** Node 20+; Docker for local MongoDB. See [README.md](README.md).
@@ -19,6 +19,10 @@ Architecture (short)
 Environment & secrets
 - API env validation: [apps/api/src/config/env.ts](apps/api/src/config/env.ts). Required vars (e.g., `JWT_ACCESS_SECRET`) are validated at startup — missing/invalid values will prevent the server from starting.
 - Web uses Vite `VITE_*` env variables: [apps/web/src/lib/env.ts](apps/web/src/lib/env.ts).
+
+Security note:
+- Never commit `.env` files or production secrets. The repo `.gitignore` includes `.env` and related patterns.
+- If you need to share test credentials, use the `test-api.http` file or a secure channel — keep production credentials out of source control.
 
 Conventions agents should follow
 - Work from repo root; use workspace `npm install` to set up node_modules and workspace links.
