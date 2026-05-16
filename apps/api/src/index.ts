@@ -29,9 +29,31 @@ async function main(): Promise<void> {
 
   app.disable("x-powered-by");
 
+  // Configure CORS to allow local dev, configured WEB_ORIGIN, and typical preview domains
+  const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173"];
+  if (env.WEB_ORIGIN) allowedOrigins.push(env.WEB_ORIGIN);
+
   app.use(
     cors({
-      origin: ["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173"],
+      origin: (origin, callback) => {
+        // Allow non-browser requests (e.g., curl, server-to-server)
+        if (!origin) return callback(null, true);
+
+        // Exact match against configured origins
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+
+        // Allow common preview hosts (Vercel, Render) by suffix
+        try {
+          const lower = origin.toLowerCase();
+          if (lower.endsWith(".vercel.app") || lower.includes("vercel.app") || lower.endsWith(".onrender.com") || lower.includes("render.com")) {
+            return callback(null, true);
+          }
+        } catch (e) {
+          // fallthrough to reject
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+      },
       credentials: true,
     })
   );
@@ -66,7 +88,7 @@ async function main(): Promise<void> {
   app.use(httpErrorHandler);
 
   app.listen(env.PORT, () => {
-    console.log(`API listening on http://localhost:${env.PORT}`);
+    console.log(`API listening on port ${env.PORT}`);
   });
 }
 
